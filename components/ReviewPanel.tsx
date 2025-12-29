@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { SelectionData } from '../types';
 
 interface ReviewPanelProps {
@@ -20,30 +20,18 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Cleaned up handleSelection to remove unused variables
   const handleSelection = useCallback(() => {
-    if (!textareaRef.current || !containerRef.current) return;
+    if (!textareaRef.current) return;
     
     const textarea = textareaRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     
+    // Only functionality needed here is to clear selection if cursor is just clicked
     if (start === end) {
       setSelectionData(null);
-      return;
     }
-
-    const selectedText = textarea.value.substring(start, end).trim();
-    if (!selectedText) {
-      setSelectionData(null);
-      return;
-    }
-
-    // Heuristic for positioning: 
-    // It is hard to get exact pixel coordinates of text inside a textarea.
-    // We will use a simpler approximation: mouse position relative to container
-    // requires capturing mouse up event coordinates.
-    // Alternatively, we just center it or use a library. 
-    // Since we can't use libraries, we will capture mouseUp coordinates in a separate handler.
   }, []);
 
   const handleMouseUp = (e: React.MouseEvent) => {
@@ -59,11 +47,6 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
              const selectedText = textarea.value.substring(start, end).trim();
              if (selectedText.length > 0) {
                  // Calculate position relative to the container
-                 const rect = textarea.getBoundingClientRect();
-                 // We can't easily get the exact text position without a mirror div.
-                 // We will position the tooltip near the mouse cursor, clamped to container.
-                 
-                 // container relative logic
                  const containerRect = containerRef.current?.getBoundingClientRect();
                  if(containerRect) {
                      const top = e.clientY - containerRect.top - 40; // 40px above cursor
