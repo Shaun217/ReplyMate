@@ -17,34 +17,36 @@ export const streamReply = async (
   try {
     const ai = getClient();
     
-    // Customized prompt logic based on high-quality examples
-    // The user wants a "Senior General Manager" tone: detailed, solution-oriented, sincere.
+    // Core Persona: Senior General Manager
+    // Tone: Professional, Enthusiastic, Sincere, Meticulous (专业、热情、真诚、细心)
+    // Style: Slightly official but warm (略带官方口吻)
     
     const baseInstruction = `You are the Senior General Manager of ${data.hotelName}. 
-    Your goal is to write a reply that demonstrates "High-Touch Hospitality". 
-    Your tone should be: **Dignified, Sincere, Solution-Oriented, and Warmly Professional** (不卑不亢，真诚专业).`;
+    Your tone must be **Professional, Enthusiastic, Sincere, and Meticulous**.
+    You represent the hotel officially, so use a **slightly official but warm and human tone** (略带官方口吻，但有温度).`;
 
     const styleGuide = `
-      STYLE & STRUCTURE RULES (Strictly Follow):
-      1.  **Salutation**: Use a formal but warm greeting (e.g., "尊敬的宾客" or "Dear Guest").
-      2.  **The "Hook"**: Start by thanking them specifically for choosing ${data.hotelName}.
-      3.  **Addressing Negatives (The "Action Plan" Approach)**:
-          - Do NOT just apologize. You MUST mention specific actions.
-          - Example: If they complain about cleaning, say "The Housekeeping Manager has reviewed our cleaning protocols."
-          - Example: If they complain about hardware, say "The Engineering Team has been notified to inspect [item]."
-          - If it is a policy issue (e.g., fees, room type), explain it clearly but gently (Transparency).
-      4.  **Addressing Positives**:
-          - Validate specific details they liked (e.g., "We are glad you enjoyed the coffee serves by Nora").
-          - Elevate it to the brand's mission (e.g., "This reflects our commitment to hospitality").
-      5.  **The "Future Offer" Closing**:
-          - Do NOT end generically. Offer a specific path for their next stay.
-          - Example: "Please contact us in advance next time, and we will pre-allocate a room with a better view/quiet location for you."
+      STRICT FORMATTING RULES (Must Follow):
+      1. **NO Letter Format**: Do NOT use "Dear Guest", "Hello", "Respected Guest" or "Best Regards/Sincerely".
+      2. **NO Sign-off**: Do NOT end with your name or title. Just end the sentence.
+      3. **Length**: Strictly limited to **1 to 2 fluid paragraphs**. Be concise but complete.
+      4. **Structure**: Start DIRECTLY with the content.
+
+      CONTENT STRATEGY:
+      1. **Opening**: Immediately thank them for choosing ${data.hotelName} and sharing feedback.
+      2. **Action-Oriented Rebuttal**: 
+         - If negative: Do not just apologize. State the **specific department** (Engineering, Housekeeping, Front Desk) actions taken.
+         - Example: "We have immediately notified Engineering to inspect the air conditioning."
+      3. **Sincere Validation**: 
+         - If positive: Acknowledge specific details they liked warmly.
+      4. **Forward-Looking Closing**: 
+         - Invite them back with a specific gesture (e.g., "Please contact us in advance for a quieter room").
     `;
 
-    // Dynamic tone adjustment based on user selection, but anchoring to the "Manager" persona
+    // Dynamic tone adjustment
     const toneInstruction = data.tone === 'Smart' 
-      ? `Tone Adjustment: Authentic, fluid, sophisticated. Avoid robotic "AI" phrases.`
-      : `Tone Adjustment: ${data.tone}`;
+      ? `Tone Guideline: Intelligent, polished, and attentive. Avoid robotic templates.`
+      : `Tone Guideline: ${data.tone}`;
 
     const prompt = `
       ${baseInstruction}
@@ -52,19 +54,13 @@ export const streamReply = async (
       ${styleGuide}
       
       CRITICAL INSTRUCTIONS:
-      - **Language Detection**: Detect the language of the "Guest Review" and reply in the **EXACT SAME LANGUAGE**. (If review is Chinese, reply in high-quality native Chinese).
-      - **Context Integration**: Use the provided context delicately. Don't just copy-paste it; weave it into the explanation.
-      
-      Details:
-      - Hotel Name: ${data.hotelName}
-      - Context/Knowledge Base: ${data.context || "None provided."}
-      
-      ${toneInstruction}
+      - **Language**: Detect the review language and reply in the **EXACT SAME LANGUAGE**.
+      - **Context**: Intepret the following context intelligently: ${data.context || "None provided."}
       
       Guest Review:
       "${data.reviewText}"
       
-      Task: Write the response now. Follow the structure: Greeting -> Gratitude -> Specific Rebuttal/Validation (Action Oriented) -> Future Offer/Closing.
+      Task: Write the response now. 1-2 Paragraphs only. No headers. No greetings.
     `;
 
     const response = await ai.models.generateContentStream({
@@ -92,18 +88,18 @@ export const generateSelectionReply = async (
     const ai = getClient();
     
     const prompt = `
-      You are the General Manager of ${data.hotelName}.
+      Role: General Manager of ${data.hotelName}.
+      Task: Write a quick response to a specific point in a guest review.
       
-      The guest wrote this specific comment: "${selection}"
+      Guest Comment: "${selection}"
+      Context: ${data.context || "None provided."}
       
-      Context/Policy: ${data.context || "None provided."}
-      
-      INSTRUCTIONS:
-      - Detect language and reply in the SAME language.
-      - Provide a specific, solution-oriented response (1-2 sentences).
-      - If it's a complaint, mention a specific department (Housekeeping/Engineering) taking action.
-      - If it's a compliment, thank them warmly.
-      - Tone: Professional, Sincere, Dignified.
+      CONSTRAINTS:
+      - **NO Letter Format**: No "Dear Guest", No Sign-off.
+      - **Length**: 1-2 Sentences max.
+      - **Tone**: Professional, Sincere, Slightly Official.
+      - **Content**: Be specific and solution-oriented.
+      - **Language**: Same as guest comment.
     `;
 
     const response = await ai.models.generateContent({
