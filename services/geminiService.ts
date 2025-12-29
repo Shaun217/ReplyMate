@@ -53,6 +53,8 @@ export const streamReply = async (
       
       ${styleGuide}
       
+      ${toneInstruction}
+      
       CRITICAL INSTRUCTIONS:
       - **Language**: Detect the review language and reply in the **EXACT SAME LANGUAGE**.
       - **Context**: Intepret the following context intelligently: ${data.context || "None provided."}
