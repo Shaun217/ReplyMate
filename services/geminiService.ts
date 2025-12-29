@@ -1,12 +1,13 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { ReviewData } from '../types';
 
 const getClient = () => {
+  // API key must be strictly obtained from environment variables as per guidelines
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.error("API_KEY is missing");
+    console.error("API_KEY is missing from environment variables");
   }
-  return new GoogleGenAI({ apiKey: apiKey || 'dummy-key-for-ui-demo' });
+  return new GoogleGenAI({ apiKey: apiKey });
 };
 
 export const streamReply = async (
@@ -70,8 +71,9 @@ export const streamReply = async (
     });
 
     for await (const chunk of response) {
-      if (chunk.text) {
-        onChunk(chunk.text);
+      const c = chunk as GenerateContentResponse;
+      if (c.text) {
+        onChunk(c.text);
       }
     }
   } catch (error) {
