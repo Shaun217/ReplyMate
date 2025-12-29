@@ -1,0 +1,5 @@
+{
+  "name": "ReplyMate",
+  "description": "AI-powered hotel review reply assistant using Google Gemini models.",
+  "requestFramePermissions": []
+}
